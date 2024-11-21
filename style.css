@@ -1,0 +1,55 @@
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.main-container {
+  background-color: rgb(212, 224, 236);
+  border-radius: 10px;
+}
+
+.equal-btn {
+  background: rgb(227, 152, 10);
+}
+
+.equal-btn:hover {
+  background: rgb(200, 132, 5);
+}
+
+.equal-btn:active {
+  background: rgb(195, 129, 8) !important ;
+}
+
+.delete-btn {
+  background: rgb(242, 89, 89);
+}
+.delete-btn:hover {
+  background: rgb(215, 70, 70);
+}
+.delete-btn:active {
+  background: rgb(184, 63, 63) !important;
+}
+
+button {
+  border: outset 2px black !important;
+}
+button:active,
+.delete-btn:active {
+  border: inset 2px black !important;
+}
+
+@media screen and (min-width: 725px) {
+  .main-container {
+    width: 75vw;
+  }
+}
+@media screen and (min-width: 810px) {
+  .main-container {
+    width: 40vw;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  header {
+    display: none;
+  }
+}
