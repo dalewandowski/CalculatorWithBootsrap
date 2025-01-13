@@ -5,12 +5,14 @@ class Calculator {
     this.mainDisplay = document.querySelector(".main-display");
     this.secondaryDisplay = document.querySelector(".secondary-display");
     this.deleteButton = document.querySelector(".delete-btn");
+    this.acButton = document.querySelector(".ac-btn"); // Added AC button
     this.equalButton = document.querySelector(".equal-btn");
     this.modal = document.querySelector(".modal-body");
     this.modalButton = document.querySelector(".modal-btn");
     this.matchOperator = null;
     this.firstNumber = "";
     this.secondNumber = "";
+    this.operation = "";
 
     this.init();
   }
@@ -26,34 +28,32 @@ class Calculator {
         this.getMatchOperator(operator)
       );
     });
-    this.deleteButton.addEventListener("click", () => this.deleteLastNumber());
-    this.deleteButton.addEventListener("dblclick", () =>
-      this.resetCalculator()
+    this.deleteButton.addEventListener("click", () =>
+      this.deleteLastCharacter()
     );
-
+    this.acButton.addEventListener("click", () => this.resetCalculator());
     this.equalButton.addEventListener("click", () => this.calculate());
     document.addEventListener("keyup", (event) => this.numberOnKeyboard(event));
     this.modalButton.addEventListener("click", () => this.showHistory());
   }
 
   setNumber(number) {
-    {
-      const selectedNumber = number.target.innerText;
-      if (this.matchOperator === null) {
-        this.firstNumber += selectedNumber;
-        this.mainDisplay.innerHTML = this.firstNumber;
-      } else {
-        this.secondNumber += selectedNumber;
-        this.mainDisplay.innerHTML = this.secondNumber;
-      }
-      console.log(
-        "First Number:",
-        this.firstNumber,
-        "Second Number:",
-        this.secondNumber
-      );
+    const selectedNumber = number.target.innerText;
+    if (this.matchOperator === null) {
+      this.firstNumber += selectedNumber;
+      this.mainDisplay.innerHTML = this.firstNumber;
+    } else {
+      this.secondNumber += selectedNumber;
+      this.mainDisplay.innerHTML = this.secondNumber;
     }
+    console.log(
+      "First Number:",
+      this.firstNumber,
+      "Second Number:",
+      this.secondNumber
+    );
   }
+
   numberOnKeyboard(event) {
     let key = event.key;
     if (/^[0-9.]$/.test(key)) {
@@ -82,13 +82,17 @@ class Calculator {
     this.matchOperator = operator.target.innerText;
     this.mainDisplay.innerHTML = this.matchOperator;
   }
-  deleteLastNumber() {
-    if (this.matchOperator === null) {
-      this.firstNumber = this.firstNumber.slice(0, -1);
-      this.mainDisplay.innerHTML = this.firstNumber;
-    } else {
+
+  deleteLastCharacter() {
+    if (this.secondNumber !== "") {
       this.secondNumber = this.secondNumber.slice(0, -1);
       this.mainDisplay.innerHTML = this.secondNumber;
+    } else if (this.matchOperator !== null) {
+      this.matchOperator = null;
+      this.mainDisplay.innerHTML = this.firstNumber;
+    } else if (this.firstNumber !== "") {
+      this.firstNumber = this.firstNumber.slice(0, -1);
+      this.mainDisplay.innerHTML = this.firstNumber;
     }
   }
 
@@ -105,40 +109,31 @@ class Calculator {
 
     switch (this.matchOperator) {
       case "+":
-        {
-          result = firstNo + secondNo;
-        }
+        result = firstNo + secondNo;
         break;
       case "-":
-        {
-          result = firstNo - secondNo;
-        }
+        result = firstNo - secondNo;
         break;
       case "*":
-        {
-          result = firstNo * secondNo;
-        }
+        result = firstNo * secondNo;
         break;
       case "/":
-        {
-          if (secondNo === 0) {
-            this.secondaryDisplay.innerHTML = "ERROR";
-            this.resetCalculator();
-          } else {
-            result = firstNo / secondNo;
-          }
+        if (secondNo === 0) {
+          this.secondaryDisplay.innerHTML = "ERROR";
+          this.resetCalculator();
+        } else {
+          result = firstNo / secondNo;
         }
         break;
       case "%":
-        {
-          result = firstNo * (secondNo / 100);
-        }
+        result = firstNo * (secondNo / 100);
         break;
 
       default:
         this.secondaryDisplay.innerHTML = "ERROR. Invalid Operator";
         break;
     }
+
     this.result = result;
     this.operation = `${this.firstNumber} ${this.matchOperator} ${this.secondNumber} = ${this.result}`;
     this.secondaryDisplay.innerHTML = result;
@@ -147,6 +142,8 @@ class Calculator {
     this.firstNumber = result.toString();
     this.secondNumber = "";
     this.matchOperator = null;
+
+    this.saveOperationToHistory(); // Save operation to history after calculation
   }
 
   resetCalculator() {
@@ -155,24 +152,20 @@ class Calculator {
     this.matchOperator = null;
     this.firstNumber = "";
     this.secondNumber = "";
-
-    // console.log(
-    //   "FIRST NUMBER: ",
-    //   this.firstNumber,
-    //   "SECOND NUMBER: ",
-    //   this.secondNumber,
-    //   "OPERATOR: ",
-    //   this.matchOperator
-    // );
   }
+
+  saveOperationToHistory() {
+    let history = JSON.parse(sessionStorage.getItem("history")) || [];
+    history.push(this.operation); // Add current operation to history
+    sessionStorage.setItem("history", JSON.stringify(history)); // Save updated history
+  }
+
   showHistory() {
     let history = JSON.parse(sessionStorage.getItem("history")) || [];
-    if (!this.operation) {
+    if (history.length === 0) {
       this.modal.innerHTML =
-        '<span class = "text-danger"> Nie wykonałeś jeszcze żadnych obliczeń </span>';
+        '<span class="text-danger">Nie wykonałeś jeszcze żadnych obliczeń</span>';
     } else {
-      history.push(this.operation);
-      sessionStorage.setItem("history", JSON.stringify(history));
       let modalItem = history.map((item) => `<div>${item}</div>`).join("");
       this.modal.innerHTML = modalItem;
     }
